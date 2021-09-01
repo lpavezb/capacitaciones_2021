@@ -44,7 +44,7 @@ env.reset()
 
 
 while True:
-
+    # test de comandos git
     # Captura la tecla que está siendo apretada y almacena su valor en key
     key = cv2.waitKey(30)
 
