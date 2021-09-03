@@ -61,7 +61,9 @@ while True:
 
     # Esto es avanzar recto hacia adelante al apretar la tecla w
     if key == ord('w'):
-        action = np.array([0.44, 0.0])
+        action = np.array([1, 0.0])
+    if key == ord('a'):
+        action = np.array([0, 1.0])
 
     ### AGREGAR MÁS COMPORTAMIENTOS ###
 
