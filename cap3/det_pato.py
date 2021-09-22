@@ -60,8 +60,8 @@ if __name__ == '__main__':
 
     # Parametros para el detector de patos
     # Se debe encontrar el rango apropiado
-    lower_yellow = np.array([H_m, S_m, V_m])
-    upper_yellow = np.array([H_M, S_M, V_M])
+    lower_yellow = np.array([15, 150, 150])
+    upper_yellow = np.array([40, 255, 255])
     min_area = 2500
 
     while True:
@@ -86,44 +86,40 @@ if __name__ == '__main__':
 
         ### CÓDIGO DE DETECCIÓN POR COLOR ###
 
-        #Transformar imagen a espacio HSV
-
+        # Transformar imagen a espacio HSV
+        image_hsv = cv2.cvtColor(obs, cv2.COLOR_RGB2HSV)
 
         # Filtrar colores de la imagen en el rango utilizando
-
+        mask = cv2.inRange(image_hsv, lower_yellow, upper_yellow)
+        kernel = np.ones((5,5),np.uint8)
+        image_erode = cv2.erode(mask, kernel, iterations = 1)
+        #Operacion morfologica dilate
+        image_dilate = cv2.dilate(image_erode, kernel, iterations = 1)
 
         # Bitwise-AND entre máscara (mask) y original (obs) para visualizar lo filtrado
-
+        image_masked = cv2.bitwise_and(image_hsv, image_hsv, mask=image_dilate)
 
         # Se define kernel para operaciones morfológicas
-        kernel = np.ones((5,5),np.uint8)
-
-        # Aplicar operaciones morfológicas para eliminar ruido
-        # Esto corresponde a hacer un Opening
-        # https://docs.opencv.org/trunk/d9/d61/tutorial_py_morphological_ops.html
-        #Operacion morfologica erode
-
-        #Operacion morfologica dilate
-
-
-        # Busca contornos de blobs
-        # https://docs.opencv.org/trunk/d3/d05/tutorial_py_table_of_contents_contours.html
-
-
+        
+        contours, _ = cv2.findContours(image_dilate, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
         # Iterar sobre contornos y dibujar bounding box de los patos
         for cnt in contours:
             # Obtener rectangulo que bordea un contorno
-
+            x, y, w, h = cv2.boundingRect(cnt)
+            AREA = cv2.contourArea(cnt)
             #Filtrar por area minima
             if AREA > min_area: # DEFINIR AREA
                 #Dibujar rectangulo en el frame original
+
+                cv2.rectangle(obs, (x, y), (x+w, y+h), (0,0,255), 3)
 
 
         # Se muestra en una ventana llamada "patos" la observación del simulador
         # con los bounding boxes dibujados
         cv2.imshow('patos', cv2.cvtColor(obs, cv2.COLOR_RGB2BGR))
+        cv2.imshow('mascara', cv2.cvtColor(image_masked,cv2.COLOR_HSV2BGR))
         # Se muestra en una ventana llamada "filtrado" la imagen filtrada
-        cv2.imshow('filtrado', image)
+        # cv2.imshow('filtrado', image)
 
 
     # Se cierra el environment y termina el programa
